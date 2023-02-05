@@ -3,8 +3,6 @@ package orderedmap
 import (
 	"reflect"
 	"testing"
-
-	"github.com/google/go-cmp/cmp"
 )
 
 func ptr[K any](input K) *K {
@@ -58,11 +56,11 @@ func kvp[K comparable, V any](key K, value V) *pair[K, V] {
 }
 
 func TestNew(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name string
-		want *OrderedMap[K, V]
+		want *OrderedMap[string, int]
 	}
-	tests := []testCase[string, int]{
+	tests := []testCase{
 		{
 			name: "initializes an empty map",
 			want: new(OrderedMap[string, int]).Init(),
@@ -78,13 +76,12 @@ func TestNew(t *testing.T) {
 }
 
 func TestOrderedMap_First(t *testing.T) {
-
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name string
-		o    OrderedMap[K, V]
-		want *pair[K, V]
+		o    OrderedMap[string, int]
+		want *pair[string, int]
 	}
-	tests := []testCase[string, int]{
+	tests := []testCase{
 		{
 			name: "First is nil for empty map",
 			o:    *New[string, int](),
@@ -124,14 +121,14 @@ func TestOrderedMap_Get(t *testing.T) {
 	type args[K comparable] struct {
 		key K
 	}
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name   string
-		o      OrderedMap[K, V]
-		args   args[K]
-		want   *V
+		o      OrderedMap[string, int]
+		args   args[string]
+		want   *int
 		wantOk bool
 	}
-	tests := []testCase[string, int]{
+	tests := []testCase{
 		{
 			name:   "Get is nil on empty map",
 			o:      *New[string, int](),
@@ -178,13 +175,13 @@ func TestOrderedMap_GetOrDefault(t *testing.T) {
 		key          K
 		defaultValue V
 	}
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name string
-		o    *OrderedMap[K, V]
-		args args[K, V]
-		want V
+		o    *OrderedMap[string, string]
+		args args[string, string]
+		want string
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name: "Provides a default value if key not found in empty map",
 			o:    New[string, string](),
@@ -223,12 +220,12 @@ func TestOrderedMap_GetOrDefault(t *testing.T) {
 }
 
 func TestOrderedMap_Init(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name string
-		o    *OrderedMap[K, V]
-		want *OrderedMap[K, V]
+		o    *OrderedMap[string, string]
+		want *OrderedMap[string, string]
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name: "Init clears/re-initializes an ordered map",
 			o:    newFromPairs(kvp("first", "1st"), kvp("second", "2nd"), kvp("third", "3rd")),
@@ -245,16 +242,16 @@ func TestOrderedMap_Init(t *testing.T) {
 }
 
 func TestOrderedMap_InsertAfter(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name    string
-		o       *OrderedMap[K, V]
-		key     K
-		value   V
-		after   K
+		o       *OrderedMap[string, string]
+		key     string
+		value   string
+		after   string
 		wantErr bool
-		expect  *OrderedMap[K, V]
+		expect  *OrderedMap[string, string]
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name:    "inserts into correct location of multiple element map",
 			o:       newFromPairs(kvp("first", "1st"), kvp("second", "2nd"), kvp("fourth", "4th"), kvp("fifth", "5th")),
@@ -313,24 +310,23 @@ func TestOrderedMap_InsertAfter(t *testing.T) {
 			}
 
 			if !Equal(tt.expect, tt.o) {
-				diff := cmp.Diff(tt.expect.GoString(), tt.o.GoString())
-				t.Errorf("InsertAfter() expected state mismatch:\n%s", diff)
+				t.Errorf("InsertAfter() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
 			}
 		})
 	}
 }
 
 func TestOrderedMap_InsertBefore(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name    string
-		o       *OrderedMap[K, V]
-		key     K
-		value   V
-		before  K
+		o       *OrderedMap[int, string]
+		key     int
+		value   string
+		before  int
 		wantErr bool
-		expect  *OrderedMap[K, V]
+		expect  *OrderedMap[int, string]
 	}
-	tests := []testCase[int, string]{
+	tests := []testCase{
 
 		{
 			name:    "inserts into correct location of multiple element map",
@@ -387,8 +383,7 @@ func TestOrderedMap_InsertBefore(t *testing.T) {
 
 			if !tt.wantErr {
 				if !Equal(tt.expect, tt.o) {
-					diff := cmp.Diff(tt.expect.GoString(), tt.o.GoString())
-					t.Errorf("InsertBefore() expected state mismatch:\n%s", diff)
+					t.Errorf("InsertBefore() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
 				}
 			}
 		})
@@ -396,12 +391,12 @@ func TestOrderedMap_InsertBefore(t *testing.T) {
 }
 
 func TestOrderedMap_Last(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name string
-		o    OrderedMap[K, V]
-		want *pair[K, V]
+		o    OrderedMap[string, int]
+		want *pair[string, int]
 	}
-	tests := []testCase[string, int]{
+	tests := []testCase{
 		{
 			name: "List is nil for empty map",
 			o:    *New[string, int](),
@@ -438,15 +433,15 @@ func TestOrderedMap_Last(t *testing.T) {
 }
 
 func TestOrderedMap_MoveAfter(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name    string
-		o       *OrderedMap[K, V]
-		key     K
-		after   K
+		o       *OrderedMap[string, string]
+		key     string
+		after   string
 		wantErr bool
-		expect  *OrderedMap[K, V]
+		expect  *OrderedMap[string, string]
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name:    "MoveAfter moves the desired value at 'key' after the pair defined at 'after'",
 			o:       newFromPairs(kvp("first", "1st"), kvp("second", "2nd"), kvp("fourth", "4th"), kvp("fifth", "5th")),
@@ -490,8 +485,7 @@ func TestOrderedMap_MoveAfter(t *testing.T) {
 
 			if !tt.wantErr {
 				if !Equal(tt.expect, tt.o) {
-					diff := cmp.Diff(tt.expect.GoString(), tt.o.GoString())
-					t.Errorf("MoveAfter() expected state mismatch:\n%s", diff)
+					t.Errorf("MoveAfter() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
 				}
 			}
 		})
@@ -499,15 +493,15 @@ func TestOrderedMap_MoveAfter(t *testing.T) {
 }
 
 func TestOrderedMap_MoveBefore(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name    string
-		o       *OrderedMap[K, V]
-		key     K
-		before  K
+		o       *OrderedMap[string, string]
+		key     string
+		before  string
 		wantErr bool
-		expect  *OrderedMap[K, V]
+		expect  *OrderedMap[string, string]
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name:    "MoveBefore moves the desired value at 'key' after the pair defined at 'after'",
 			o:       newFromPairs(kvp("first", "1st"), kvp("second", "2nd"), kvp("third", "3rd"), kvp("fourth", "4th"), kvp("fifth", "5th")),
@@ -551,8 +545,7 @@ func TestOrderedMap_MoveBefore(t *testing.T) {
 
 			if !tt.wantErr {
 				if !Equal(tt.expect, tt.o) {
-					diff := cmp.Diff(tt.expect.GoString(), tt.o.GoString())
-					t.Errorf("MoveBefore() expected state mismatch:\n%s", diff)
+					t.Errorf("MoveBefore() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
 				}
 			}
 		})
@@ -560,14 +553,14 @@ func TestOrderedMap_MoveBefore(t *testing.T) {
 }
 
 func TestOrderedMap_MoveToBack(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name    string
-		key     K
-		o       *OrderedMap[K, V]
-		expect  *OrderedMap[K, V]
+		key     string
+		o       *OrderedMap[string, string]
+		expect  *OrderedMap[string, string]
 		wantErr bool
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name:   "MoveToBack moves first element to back",
 			o:      newFromPairs(kvp("first", "1st"), kvp("second", "2nd"), kvp("third", "3rd"), kvp("fourth", "4th"), kvp("fifth", "5th")),
@@ -606,8 +599,7 @@ func TestOrderedMap_MoveToBack(t *testing.T) {
 
 			if !tt.wantErr {
 				if !Equal(tt.expect, tt.o) {
-					diff := cmp.Diff(tt.expect.GoString(), tt.o.GoString())
-					t.Errorf("MoveToBack() expected state mismatch:\n%s", diff)
+					t.Errorf("MoveToBack() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
 				}
 			}
 		})
@@ -615,14 +607,14 @@ func TestOrderedMap_MoveToBack(t *testing.T) {
 }
 
 func TestOrderedMap_MoveToFront(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name    string
-		key     K
-		o       *OrderedMap[K, V]
-		expect  *OrderedMap[K, V]
+		key     string
+		o       *OrderedMap[string, string]
+		expect  *OrderedMap[string, string]
 		wantErr bool
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name:   "MoveToFront moves last element to front",
 			o:      newFromPairs(kvp("first", "1st"), kvp("second", "2nd"), kvp("third", "3rd"), kvp("fourth", "4th"), kvp("fifth", "5th")),
@@ -661,8 +653,7 @@ func TestOrderedMap_MoveToFront(t *testing.T) {
 
 			if !tt.wantErr {
 				if !Equal(tt.expect, tt.o) {
-					diff := cmp.Diff(tt.expect.GoString(), tt.o.GoString())
-					t.Errorf("MoveToFront() expected state mismatch:\n%s", diff)
+					t.Errorf("MoveToFront() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
 				}
 			}
 		})
@@ -670,15 +661,15 @@ func TestOrderedMap_MoveToFront(t *testing.T) {
 }
 
 func TestOrderedMap_Remove(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name   string
-		o      *OrderedMap[K, V]
-		key    K
-		want   *pair[K, V]
+		o      *OrderedMap[string, string]
+		key    string
+		want   *pair[string, string]
 		wantOk bool
-		expect *OrderedMap[K, V]
+		expect *OrderedMap[string, string]
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name:   "Removes an existing element",
 			o:      newFromPairs(kvp("first", "1st"), kvp("second", "2nd"), kvp("fourth", "4th"), kvp("fifth", "5th")),
@@ -714,22 +705,21 @@ func TestOrderedMap_Remove(t *testing.T) {
 			}
 
 			if !Equal(tt.expect, tt.o) {
-				diff := cmp.Diff(tt.expect.GoString(), tt.o.GoString())
-				t.Errorf("Remove() expected state mismatch:\n%s", diff)
+				t.Errorf("Remove() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
 			}
 		})
 	}
 }
 
 func TestOrderedMap_Set(t *testing.T) {
-	type testCase[K comparable, V any] struct {
+	type testCase struct {
 		name   string
-		o      *OrderedMap[K, V]
-		key    K
-		value  V
-		expect *OrderedMap[K, V]
+		o      *OrderedMap[string, string]
+		key    string
+		value  string
+		expect *OrderedMap[string, string]
 	}
-	tests := []testCase[string, string]{
+	tests := []testCase{
 		{
 			name:   "Set on new map",
 			o:      New[string, string](),
@@ -763,8 +753,7 @@ func TestOrderedMap_Set(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.o.Set(tt.key, tt.value)
 			if !Equal(tt.expect, tt.o) {
-				diff := cmp.Diff(tt.expect.GoString(), tt.o.GoString())
-				t.Errorf("Set() expected state mismatch:\n%s", diff)
+				t.Errorf("Set() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
 			}
 		})
 	}

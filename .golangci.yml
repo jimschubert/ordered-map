@@ -8,12 +8,13 @@ output:
   sort-results: true
 
 linters:
-  disable-all: true
+#  disable-all: true
   enable:
     - gofmt
     - govet
     - gocyclo
     - staticcheck
+    - typecheck
 
 linters-settings:
   # https://golangci-lint.run/usage/linters/#gocyclo
@@ -27,10 +28,6 @@ linters-settings:
     rewrite-rules:
       - pattern: 'a[b:len(a)]'
         replacement: 'a[b:]'
-      - pattern: 'a := make(map[b]c, 0)'
-        replacement: 'a := make(map[b]c)'
-      - pattern: 'a := make([]b)'
-        replacement: 'a := make([]b, 0)'
 
   # https://golangci-lint.run/usage/linters/#stylecheck
   stylecheck:

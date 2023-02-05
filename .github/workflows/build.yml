@@ -11,15 +11,16 @@ jobs:
     env:
       GO111MODULE: "on"
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Install Go
         uses: actions/setup-go@v3
         with:
           go-version-file: go.mod
 
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Download Go modules
         run: go mod download
@@ -31,4 +32,4 @@ jobs:
         run: go build -v ./...
 
       - name: Test
-        run: go test -v -race ./...
+        run: go test -v -race ./... -cover
