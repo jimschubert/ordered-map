@@ -3,6 +3,8 @@ package orderedmap
 import (
 	"reflect"
 	"testing"
+
+	"github.com/jimschubert/ordered-map/internal/myers"
 )
 
 func ptr[K any](input K) *K {
@@ -309,9 +311,7 @@ func TestOrderedMap_InsertAfter(t *testing.T) {
 				t.Logf("InsertAfter() error was: %s", err.Error())
 			}
 
-			if !Equal(tt.expect, tt.o) {
-				t.Errorf("InsertAfter() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
-			}
+			compareOrderedMaps(t, tt.expect, tt.o)
 		})
 	}
 }
@@ -382,9 +382,7 @@ func TestOrderedMap_InsertBefore(t *testing.T) {
 			}
 
 			if !tt.wantErr {
-				if !Equal(tt.expect, tt.o) {
-					t.Errorf("InsertBefore() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
-				}
+				compareOrderedMaps(t, tt.expect, tt.o)
 			}
 		})
 	}
@@ -484,9 +482,7 @@ func TestOrderedMap_MoveAfter(t *testing.T) {
 			}
 
 			if !tt.wantErr {
-				if !Equal(tt.expect, tt.o) {
-					t.Errorf("MoveAfter() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
-				}
+				compareOrderedMaps(t, tt.expect, tt.o)
 			}
 		})
 	}
@@ -544,9 +540,7 @@ func TestOrderedMap_MoveBefore(t *testing.T) {
 			}
 
 			if !tt.wantErr {
-				if !Equal(tt.expect, tt.o) {
-					t.Errorf("MoveBefore() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
-				}
+				compareOrderedMaps(t, tt.expect, tt.o)
 			}
 		})
 	}
@@ -598,9 +592,7 @@ func TestOrderedMap_MoveToBack(t *testing.T) {
 			}
 
 			if !tt.wantErr {
-				if !Equal(tt.expect, tt.o) {
-					t.Errorf("MoveToBack() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
-				}
+				compareOrderedMaps(t, tt.expect, tt.o)
 			}
 		})
 	}
@@ -652,9 +644,7 @@ func TestOrderedMap_MoveToFront(t *testing.T) {
 			}
 
 			if !tt.wantErr {
-				if !Equal(tt.expect, tt.o) {
-					t.Errorf("MoveToFront() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
-				}
+				compareOrderedMaps(t, tt.expect, tt.o)
 			}
 		})
 	}
@@ -704,9 +694,7 @@ func TestOrderedMap_Remove(t *testing.T) {
 				t.Errorf("Remove() ok %v, wantOk %v", ok, tt.wantOk)
 			}
 
-			if !Equal(tt.expect, tt.o) {
-				t.Errorf("Remove() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
-			}
+			compareOrderedMaps(t, tt.expect, tt.o)
 		})
 	}
 }
@@ -752,9 +740,19 @@ func TestOrderedMap_Set(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.o.Set(tt.key, tt.value)
-			if !Equal(tt.expect, tt.o) {
-				t.Errorf("Set() expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", tt.expect.GoString(), tt.o.GoString())
-			}
+			compareOrderedMaps(t, tt.expect, tt.o)
 		})
+	}
+}
+
+func compareOrderedMaps[K comparable, T any](t *testing.T, left *OrderedMap[K, T], right *OrderedMap[K, T]) {
+	t.Helper()
+
+	if !Equal(left, right) {
+		if diff, ok := myers.Diff(left.GoString(), right.GoString()); ok {
+			t.Errorf("Expected state mismatch:\n%s\n", diff)
+		} else {
+			t.Errorf("Expected state mismatch:\nwanted:\n%s\ngot:\n%s\n", left.GoString(), right.GoString())
+		}
 	}
 }
