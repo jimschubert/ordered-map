@@ -1,5 +1,10 @@
 # ordered-map
 
+[![Apache 2.0 License](https://img.shields.io/badge/License-Apache%202.0-blue)](./LICENSE)
+![Go Version](https://img.shields.io/github/go-mod/go-version/jimschubert/ordered-map)
+[![Go Build](https://github.com/jimschubert/ordered-map/actions/workflows/build.yml/badge.svg)](https://github.com/jimschubert/ordered-map/actions/workflows/build.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jimschubert/ordered-map)](https://goreportcard.com/report/github.com/jimschubert/ordered-map)
+
 Package `orderedmap` defines a generic Ordered Map data structure with an API similar to that of [container/list](https://pkg.go.dev/container/list).
 
 The intent of an ordered map is to retain a map's key insertion order, similar to [LinkedHashMap](https://docs.oracle.com/javase/8/docs/api/java/util/LinkedHashMap.html) from Java.
