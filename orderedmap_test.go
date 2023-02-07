@@ -756,3 +756,50 @@ func compareOrderedMaps[K comparable, T any](t *testing.T, left *OrderedMap[K, T
 		}
 	}
 }
+
+func TestOrderedMap_Keys(t *testing.T) {
+	type testCase struct {
+		name  string
+		o     *OrderedMap[string, int]
+		want  []string
+		manip func(o *OrderedMap[string, int])
+	}
+	tests := []testCase{
+		{
+			name: "empty map yields empty keys",
+			o:    New[string, int](),
+			want: []string{},
+		},
+		{
+			name: "multiple value map yields correct order",
+			o:    newFromPairs(kvp("one", 1), kvp("two", 2), kvp("three", 3), kvp("four", 4)),
+			want: []string{"one", "two", "three", "four"},
+		},
+		{
+			name: "keys should not be cached and returned with original order after map manipulation",
+			o:    newFromPairs(kvp("one", 1), kvp("two", 2), kvp("three", 3), kvp("four", 4)),
+			manip: func(o *OrderedMap[string, int]) {
+				if err := o.MoveToBack("one"); err != nil {
+					t.Fatalf("Keys(): failed to manipulate map: %v", err)
+				}
+			},
+			want: []string{"one", "two", "three", "four"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.o.Keys()
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Keys() = %v, want %v", got, tt.want)
+			}
+
+			if tt.manip != nil {
+				tt.manip(tt.o)
+				got = tt.o.Keys()
+				if reflect.DeepEqual(got, tt.want) {
+					t.Errorf("Keys() manipulated map should not yield the same keys: %v", got)
+				}
+			}
+		})
+	}
+}

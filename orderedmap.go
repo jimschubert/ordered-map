@@ -103,6 +103,21 @@ func (o *OrderedMap[K, V]) Iterator() *Iterator[K, V] {
 	}
 }
 
+// Keys returns the ordered slice of keys for this map
+func (o *OrderedMap[K, V]) Keys() []K {
+	keys := make([]K, 0)
+	it := o.Iterator()
+	var kvp *KeyValuePair[K, V]
+	for {
+		kvp = it.Next()
+		if kvp == nil {
+			break
+		}
+		keys = append(keys, kvp.Key)
+	}
+	return keys
+}
+
 // MoveToFront allows for manipulating the order of a map by moving key (and associated value) to the front of the map.
 //
 // If key does not exist in the map, this will raise a KeyNotFoundError to signal failed intent to the caller.
