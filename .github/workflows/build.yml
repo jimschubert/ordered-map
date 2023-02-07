@@ -1,6 +1,11 @@
 name: build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feature/**'
+  pull_request:
 
 jobs:
   build:
@@ -20,7 +25,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: go.mod
-
 
       - name: Download Go modules
         run: go mod download
