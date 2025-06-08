@@ -54,7 +54,7 @@ func (o *OrderedMap[K, V]) Get(key K) (*V, bool) {
 	return nil, false
 }
 
-// GetOrDefault either gets teh value stored at key or returns the default value defined by defaultValue
+// GetOrDefault either gets the value stored at key or returns the default value defined by defaultValue
 func (o *OrderedMap[K, V]) GetOrDefault(key K, defaultValue V) V {
 	value, ok := o.Get(key)
 	if value == nil || !ok {
@@ -227,7 +227,7 @@ func (o *OrderedMap[K, V]) InsertBefore(key K, value V, before K) error {
 	return keyNotFound(key)
 }
 
-// String fulfils the fmt.Stringer interface
+// String fulfills the fmt.Stringer interface
 func (o *OrderedMap[K, V]) String() string {
 	buf := bytes.Buffer{}
 	buf.WriteString(fmt.Sprintf("OrderedMap[%T,%T]", *new(K), *new(V)))
