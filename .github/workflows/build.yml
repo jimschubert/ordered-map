@@ -1,39 +1,9 @@
-name: build
-
+name: Build Go
 on:
   push:
-    branches:
-      - 'main'
-      - 'feature/**'
-  pull_request:
+    branches: [ 'main', 'master', 'feature/*' ]
 
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    env:
-      GO111MODULE: "on"
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Install Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: go.mod
-
-      - name: Download Go modules
-        run: go mod download
-
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v8
-
-      - name: Build
-        run: go build -v ./...
-
-      - name: Test
-        run: go test -v -race ./... -cover
+    uses: jimschubert/.workflows/.github/workflows/go-build.yml@main
+    secrets: inherit
