@@ -757,6 +757,29 @@ func compareOrderedMaps[K comparable, T any](t *testing.T, left *OrderedMap[K, T
 	}
 }
 
+func TestEqual(t *testing.T) {
+	tests := []struct {
+		name string
+		x    *OrderedMap[string, int]
+		y    *OrderedMap[string, int]
+		want bool
+	}{
+		{"both nil", nil, nil, true},
+		{"x nil, y empty", nil, New[string, int](), false},
+		{"x empty, y nil", New[string, int](), nil, false},
+		{"both empty", New[string, int](), New[string, int](), true},
+		{"same content", newFromPairs(kvp("a", 1), kvp("b", 2)), newFromPairs(kvp("a", 1), kvp("b", 2)), true},
+		{"different order", newFromPairs(kvp("a", 1), kvp("b", 2)), newFromPairs(kvp("b", 2), kvp("a", 1)), false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Equal(tt.x, tt.y); got != tt.want {
+				t.Errorf("Equal() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestOrderedMap_Keys(t *testing.T) {
 	type testCase struct {
 		name  string

@@ -12,6 +12,9 @@ import "reflect"
 // This implementation will incur the overhead of reflect.DeepEqual mentioned above if any key in the OrderedMap refers
 // to an OrderedMap value.
 func Equal[K comparable, V any](x, y *OrderedMap[K, V]) bool {
+	if x == nil && y == nil {
+		return true
+	}
 	if (x == nil && y != nil) || (y == nil && x != nil) {
 		return false
 	}
