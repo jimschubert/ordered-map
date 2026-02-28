@@ -1,3 +1,12 @@
+formatters:
+  settings:
+    gofumpt:
+      # Module path which contains the source code being formatted.
+      # Default: ""
+      module-path: github.com/org/project
+      # Choose whether to use the extra rules.
+      # Default: false
+      extra-rules: true
 version: "2"
 severity:
   default: error
@@ -14,7 +23,7 @@ linters:
     - staticcheck
     - unused
     - funcorder
-    - copyloopvar
+    # - copyloopvar
     - ineffassign
     - misspell
     - revive

@@ -43,6 +43,8 @@ There are also some utility functions:
 	myValue:= myMap.GetOrDefault("Tenth", "10th")
 	first := myMap.First()
 	last := myMap.Last()
+	n := myMap.Len()
+	has := myMap.Contains("Second")
 
 There are functions to manipulate the map as well (including the order of elements):
 

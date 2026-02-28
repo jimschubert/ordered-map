@@ -97,6 +97,23 @@ func (o *OrderedMap[K, V]) Last() *KeyValuePair[K, V] {
 	return nil
 }
 
+// Len returns the number of key-value pairs in the map.
+func (o *OrderedMap[K, V]) Len() int {
+	if o == nil || o.order == nil {
+		return 0
+	}
+	return o.order.Len()
+}
+
+// Contains reports whether the map contains key.
+func (o *OrderedMap[K, V]) Contains(key K) bool {
+	if o == nil || o.items == nil {
+		return false
+	}
+	_, ok := o.items[key]
+	return ok
+}
+
 // Iterator returns an initialized *Iterator[K, V] for walking the map's contents in-order.
 func (o *OrderedMap[K, V]) Iterator() *Iterator[K, V] {
 	return &Iterator[K, V]{
@@ -105,9 +122,9 @@ func (o *OrderedMap[K, V]) Iterator() *Iterator[K, V] {
 	}
 }
 
-// Keys returns the ordered slice of keys for this map
+// Keys returns the ordered slice of keys for this map.
 func (o *OrderedMap[K, V]) Keys() []K {
-	keys := make([]K, 0)
+	keys := make([]K, 0, o.Len())
 	it := o.Iterator()
 	var kvp *KeyValuePair[K, V]
 	for {

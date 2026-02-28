@@ -54,7 +54,10 @@ func newFromPairs[K comparable, V any](item ...*pair[K, V]) *OrderedMap[K, V] {
 }
 
 func kvp[K comparable, V any](key K, value V) *pair[K, V] {
-	return &pair[K, V]{Key: key, Value: value}
+	return &pair[K, V]{
+		Key:   key,
+		Value: value,
+	}
 }
 
 func TestNew(t *testing.T) {
@@ -132,16 +135,20 @@ func TestOrderedMap_Get(t *testing.T) {
 	}
 	tests := []testCase{
 		{
-			name:   "Get is nil on empty map",
-			o:      *New[string, int](),
-			args:   args[string]{key: "a"},
+			name: "Get is nil on empty map",
+			o:    *New[string, int](),
+			args: args[string]{
+				key: "a",
+			},
 			want:   nil,
 			wantOk: false,
 		},
 		{
-			name:   "Get expected value on single entry map",
-			o:      *newFromPairs[string, int](kvp("a", 1)),
-			args:   args[string]{key: "a"},
+			name: "Get expected value on single entry map",
+			o:    *newFromPairs[string, int](kvp("a", 1)),
+			args: args[string]{
+				key: "a",
+			},
 			want:   ptr(1),
 			wantOk: true,
 		},
@@ -154,7 +161,9 @@ func TestOrderedMap_Get(t *testing.T) {
 				kvp("p", 2134),
 				kvp("dog", 0),
 			),
-			args:   args[string]{key: "p"},
+			args: args[string]{
+				key: "p",
+			},
 			want:   ptr(2134),
 			wantOk: true,
 		},
@@ -375,7 +384,6 @@ func TestOrderedMap_InsertBefore(t *testing.T) {
 		expect  *OrderedMap[int, string]
 	}
 	tests := []testCase{
-
 		{
 			name:    "inserts into correct location of multiple element map",
 			o:       newFromPairs(kvp(987, "Employee 1"), kvp(443, "Employee 2"), kvp(101, "Employee 4"), kvp(814, "Employee 5")),
@@ -793,7 +801,7 @@ func TestOrderedMap_Set(t *testing.T) {
 	}
 }
 
-func compareOrderedMaps[K comparable, T any](t *testing.T, left *OrderedMap[K, T], right *OrderedMap[K, T]) {
+func compareOrderedMaps[K comparable, T any](t *testing.T, left, right *OrderedMap[K, T]) {
 	t.Helper()
 
 	if !Equal(left, right) {
@@ -812,17 +820,140 @@ func TestEqual(t *testing.T) {
 		y    *OrderedMap[string, int]
 		want bool
 	}{
-		{"both nil", nil, nil, true},
-		{"x nil, y empty", nil, New[string, int](), false},
-		{"x empty, y nil", New[string, int](), nil, false},
-		{"both empty", New[string, int](), New[string, int](), true},
-		{"same content", newFromPairs(kvp("a", 1), kvp("b", 2)), newFromPairs(kvp("a", 1), kvp("b", 2)), true},
-		{"different order", newFromPairs(kvp("a", 1), kvp("b", 2)), newFromPairs(kvp("b", 2), kvp("a", 1)), false},
+		{
+			name: "both nil",
+			want: true,
+		},
+		{
+			name: "x nil, y empty",
+			y:    New[string, int](),
+			want: false,
+		},
+		{
+			name: "x empty, y nil",
+			x:    New[string, int](),
+			want: false,
+		},
+		{
+			name: "both empty",
+			x:    New[string, int](),
+			y:    New[string, int](),
+			want: true,
+		},
+		{
+			name: "same content",
+			x:    newFromPairs(kvp("a", 1), kvp("b", 2)),
+			y:    newFromPairs(kvp("a", 1), kvp("b", 2)),
+			want: true,
+		},
+		{
+			name: "different order",
+			x:    newFromPairs(kvp("a", 1), kvp("b", 2)),
+			y:    newFromPairs(kvp("b", 2), kvp("a", 1)),
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Equal(tt.x, tt.y); got != tt.want {
 				t.Errorf("Equal() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestOrderedMap_Len(t *testing.T) {
+	tests := []struct {
+		name string
+		o    *OrderedMap[string, int]
+		want int
+	}{
+		{
+			name: "empty map",
+			o:    New[string, int](),
+			want: 0,
+		},
+		{
+			name: "single element",
+			o:    newFromPairs(kvp("a", 1)),
+			want: 1,
+		},
+		{
+			name: "multiple elements",
+			o:    newFromPairs(kvp("a", 1), kvp("b", 2), kvp("c", 3)),
+			want: 3,
+		},
+		{
+			name: "after Remove",
+			o: func() *OrderedMap[string, int] {
+				m := newFromPairs(kvp("a", 1), kvp("b", 2))
+				m.Remove("a")
+				return m
+			}(),
+			want: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.o.Len(); got != tt.want {
+				t.Errorf("Len() = %d, want %d", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestOrderedMap_Contains(t *testing.T) {
+	tests := []struct {
+		name string
+		o    *OrderedMap[string, int]
+		key  string
+		want bool
+	}{
+		{
+			name: "empty map missing",
+			o:    New[string, int](),
+			key:  "x",
+			want: false,
+		},
+		{
+			name: "single element present",
+			o:    newFromPairs(kvp("a", 1)),
+			key:  "a",
+			want: true,
+		},
+		{
+			name: "single element missing",
+			o:    newFromPairs(kvp("a", 1)),
+			key:  "b",
+			want: false,
+		},
+		{
+			name: "multiple elements present",
+			o:    newFromPairs(kvp("a", 1), kvp("b", 2), kvp("c", 3)),
+			key:  "b",
+			want: true,
+		},
+		{
+			name: "multiple elements missing",
+			o:    newFromPairs(kvp("a", 1), kvp("b", 2), kvp("c", 3)),
+			key:  "z",
+			want: false,
+		},
+		{
+			name: "after Remove returns false",
+			o: func() *OrderedMap[string, int] {
+				m := newFromPairs(kvp("a", 1), kvp("b", 2))
+				m.Remove("a")
+				return m
+			}(),
+			key:  "a",
+			want: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.o.Contains(tt.key); got != tt.want {
+				t.Errorf("Contains(%q) = %v, want %v", tt.key, got, tt.want)
 			}
 		})
 	}
