@@ -202,7 +202,7 @@ func (o *OrderedMap[K, V]) InsertAfter(key K, value V, after K) error {
 		return nil
 	}
 
-	return keyNotFound(key)
+	return keyNotFound(after)
 }
 
 // InsertBefore allows for manipulating the order of a map by inserting the provided key and value before the pair defined at 'before'.
@@ -224,7 +224,7 @@ func (o *OrderedMap[K, V]) InsertBefore(key K, value V, before K) error {
 		o.order.MoveBefore(newElement.element, mark.element)
 		return nil
 	}
-	return keyNotFound(key)
+	return keyNotFound(before)
 }
 
 // String fulfills the fmt.Stringer interface
