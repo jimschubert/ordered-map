@@ -221,6 +221,54 @@ func TestOrderedMap_GetOrDefault(t *testing.T) {
 	}
 }
 
+func TestOrderedMap_GetOrDefault_PointerType(t *testing.T) {
+	// When V is a pointer type, a stored nil value must be returned as-is; only key absence uses the default.
+	defaultVal := 42
+	tests := []struct {
+		name string
+		o    *OrderedMap[string, *int]
+		key  string
+		want *int
+	}{
+		{
+			name: "key absent returns default",
+			o:    New[string, *int](),
+			key:  "missing",
+			want: &defaultVal,
+		},
+		{
+			name: "key present with non-nil value returns stored value",
+			o:    newFromPairs(kvp("x", ptr(1))),
+			key:  "x",
+			want: ptr(1),
+		},
+		{
+			name: "key present with nil value returns nil not default",
+			o: func() *OrderedMap[string, *int] {
+				m := New[string, *int]()
+				m.Set("nil", nil)
+				return m
+			}(),
+			key:  "nil",
+			want: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.o.GetOrDefault(tt.key, &defaultVal)
+			if tt.want == nil {
+				if got != nil {
+					t.Errorf("GetOrDefault() = %v, want nil", got)
+				}
+				return
+			}
+			if got == nil || *got != *tt.want {
+				t.Errorf("GetOrDefault() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestOrderedMap_Init(t *testing.T) {
 	type testCase struct {
 		name string

@@ -54,13 +54,13 @@ func (o *OrderedMap[K, V]) Get(key K) (*V, bool) {
 	return nil, false
 }
 
-// GetOrDefault either gets the value stored at key or returns the default value defined by defaultValue
+// GetOrDefault returns the value stored at key, or defaultValue if the key is not present.
+// When V is a pointer or interface type, a stored nil value is returned as-is; only absence of the key uses the default.
 func (o *OrderedMap[K, V]) GetOrDefault(key K, defaultValue V) V {
 	value, ok := o.Get(key)
-	if value == nil || !ok {
+	if !ok {
 		return defaultValue
 	}
-
 	return *value
 }
 
