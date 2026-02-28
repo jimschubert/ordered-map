@@ -45,7 +45,7 @@ for {
     }
     fmt.Printf("Shorthand for %q is %q.\n", i.Key, i.Value)
 }
-````
+```
 
 Get the value defined at some key:
 
