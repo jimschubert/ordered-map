@@ -13,10 +13,7 @@ func (i *Iterator[K, V]) Next() *KeyValuePair[K, V] {
 	if i.pos == nil {
 		return nil
 	}
-	var value *KeyValuePair[K, V]
-	if i.pos.Value != nil {
-		value = i.pos.Value
-		i.pos = i.pos.Next()
-	}
+	value := i.pos.Value()
+	i.pos = i.pos.Next()
 	return value
 }

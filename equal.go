@@ -18,7 +18,14 @@ func Equal[K comparable, V any](x, y *OrderedMap[K, V]) bool {
 	if (x == nil && y != nil) || (y == nil && x != nil) {
 		return false
 	}
-	if x.order.Len() != y.order.Len() {
+	xLen, yLen := 0, 0
+	if x.order != nil {
+		xLen = x.order.Len()
+	}
+	if y.order != nil {
+		yLen = y.order.Len()
+	}
+	if xLen != yLen {
 		return false
 	}
 

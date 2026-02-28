@@ -15,13 +15,17 @@ import (
 // NOTE: This map maintains ordering, _not_ sorting.
 type OrderedMap[K comparable, V any] struct {
 	items map[K]*KeyValuePair[K, V]
-	order list.List[*KeyValuePair[K, V]]
+	order *list.List[*KeyValuePair[K, V]]
 }
 
 // Init initializes or clears ordered map o.
 func (o *OrderedMap[K, V]) Init() *OrderedMap[K, V] {
 	o.items = make(map[K]*KeyValuePair[K, V])
-	o.order.Init()
+	if o.order == nil {
+		o.order = list.New[*KeyValuePair[K, V]]()
+	} else {
+		o.order.Init()
+	}
 	return o
 }
 
@@ -79,20 +83,18 @@ func (o *OrderedMap[K, V]) Remove(key K) (*KeyValuePair[K, V], bool) {
 
 // First returns the first KeyValuePair contained in the map, or nil.
 func (o *OrderedMap[K, V]) First() *KeyValuePair[K, V] {
-	front := o.order.Front()
-	if front == nil {
-		return nil
+	if f := o.order.Front(); f != nil {
+		return f.Value()
 	}
-	return front.Value
+	return nil
 }
 
 // Last returns the last KeyValuePair contained in the map, or nil.
 func (o *OrderedMap[K, V]) Last() *KeyValuePair[K, V] {
-	last := o.order.Back()
-	if last == nil {
-		return nil
+	if b := o.order.Back(); b != nil {
+		return b.Value()
 	}
-	return last.Value
+	return nil
 }
 
 // Iterator returns an initialized *Iterator[K, V] for walking the map's contents in-order.
@@ -231,10 +233,12 @@ func (o *OrderedMap[K, V]) InsertBefore(key K, value V, before K) error {
 func (o *OrderedMap[K, V]) String() string {
 	buf := bytes.Buffer{}
 	buf.WriteString(fmt.Sprintf("OrderedMap[%T,%T]", *new(K), *new(V)))
-	if o != nil && o.order.Len() > 0 {
-		l := o.order
-		for e := l.Front(); e != nil; e = e.Next() {
-			buf.WriteString(fmt.Sprintf("\t%v=%v,\n", e.Value.Key, e.Value.Value))
+	if o != nil && o.order != nil && o.order.Len() > 0 {
+		for e := o.order.Front(); e != nil; e = e.Next() {
+			kvp := e.Value()
+			if kvp != nil {
+				buf.WriteString(fmt.Sprintf("\t%v=%v,\n", kvp.Key, kvp.Value))
+			}
 		}
 	} else {
 		buf.WriteString("{}")
@@ -249,13 +253,15 @@ func (o *OrderedMap[K, V]) GoString() string {
 	}
 	buf := bytes.Buffer{}
 	buf.WriteString(fmt.Sprintf("orderedmap.New[%T,%T]()", *new(K), *new(V)))
-	if o != nil && o.order.Len() > 0 {
+	if o.order != nil && o.order.Len() > 0 {
 		buf.WriteString(".\n")
-		l := o.order
-		for e := l.Front(); e != nil; e = e.Next() {
-			buf.WriteString(fmt.Sprintf("\tSet(%#v, %#v)", e.Value.Key, e.Value.Value))
-			if e.Next() != nil {
-				buf.WriteString(".\n")
+		for e := o.order.Front(); e != nil; e = e.Next() {
+			kvp := e.Value()
+			if kvp != nil {
+				buf.WriteString(fmt.Sprintf("\tSet(%#v, %#v)", kvp.Key, kvp.Value))
+				if e.Next() != nil {
+					buf.WriteString(".\n")
+				}
 			}
 		}
 	}
@@ -264,9 +270,5 @@ func (o *OrderedMap[K, V]) GoString() string {
 
 // New initializes a new OrderedMap
 func New[K comparable, V any]() *OrderedMap[K, V] {
-	m := new(OrderedMap[K, V])
-	l := list.New[*KeyValuePair[K, V]]()
-	m.order = *l
-	m.Init()
-	return m
+	return new(OrderedMap[K, V]).Init()
 }
