@@ -4,6 +4,9 @@ Package orderedmap defines a generic Ordered Map data structure with an API simi
 The intent of an ordered map is to retain a map's key insertion order, similar to [LinkedHashMap] from Java.
 It is *not* to constrain a map to *sorted* order.
 
+OrderedMap is not safe for concurrent use. For concurrent access, use the
+thread-safe variant from [github.com/jimschubert/ordered-map/concurrent].
+
 # Usage
 
 Go does not allow for extensions to built-in maps. As such there is no "range" or keyed assignments.
