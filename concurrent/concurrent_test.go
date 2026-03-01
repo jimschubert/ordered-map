@@ -304,7 +304,7 @@ func TestConcurrentIterators(t *testing.T) {
 
 	numIterators := 5
 	var wg sync.WaitGroup
-	var successCount atomic.Int32
+	var successCount int32
 
 	for i := 0; i < numIterators; i++ {
 		wg.Add(1)
@@ -320,14 +320,14 @@ func TestConcurrentIterators(t *testing.T) {
 				count++
 			}
 			if count == 50 {
-				successCount.Add(1)
+				atomic.AddInt32(&successCount, 1)
 			}
 		}()
 	}
 
 	wg.Wait()
 
-	assert.Equal(t, int32(numIterators), successCount.Load())
+	assert.Equal(t, int32(numIterators), atomic.LoadInt32(&successCount))
 }
 
 // TestIteratorWithConcurrentRemovals iterator with concurrent removals.
